@@ -12,7 +12,6 @@
         "internalName": "MegaProvider",
         "description": "This plugin adds all repositories each time the app is opened. Uninstall after one run if you do not want all repositories. Does not automatically refresh the repository list.",
         "url": "https://raw.githubusercontent.com/Rahul6051276/MegaRepo/builds/MegaProvider.cs3",
-           "https://raw.githubusercontent.com/Rahul6051276/cloudstream-extensions-phisher/refs/heads/builds/plugins.json"
         "name": "MegaProvider"
     }
 ]

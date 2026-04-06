@@ -12,7 +12,8 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.3")
         classpath("com.github.recloudstream:gradle:master-SNAPSHOT")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0") 
+        // आपके Gradle 8.12 के साथ यह वर्जन बेस्ट काम करेगा
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10") 
     }
 }
 
@@ -41,13 +42,15 @@ subprojects {
             targetSdk = 35
         }
         compileOptions {
+            // नई मशीन (8.12) के लिए Java 17 अनिवार्य है
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
         }
         tasks.withType<KotlinJvmCompile> {
             compilerOptions {
                 jvmTarget.set(JvmTarget.JVM_17)
-                freeCompilerArgs.addAll("-Xskip-prerelease-check")
+                // यह लाइन वर्जन के छोटे-मोटे झगड़ों को खत्म कर देगी
+                freeCompilerArgs.addAll("-Xskip-prerelease-check", "-Xallow-unstable-dependencies")
             }
         }
     }

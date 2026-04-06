@@ -7,15 +7,15 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        // Shitpack repo which contains our tools and dependencies
         maven("https://jitpack.io")
     }
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.3")
-        // Cloudstream gradle plugin which makes everything work and builds plugins
+        // Cloudstream gradle plugin
         classpath("com.github.recloudstream:gradle:master-SNAPSHOT")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+        // यहाँ हमने वर्जन को 2.1.10 कर दिया है ताकि लेटेस्ट Metadata मैच हो सके
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10")
     }
 }
 
@@ -37,12 +37,11 @@ subprojects {
     apply(plugin = "com.lagradost.cloudstream3.gradle")
 
     cloudstream {
-        // when running through github workflow, GITHUB_REPOSITORY should contain current repository name
-        setRepo(System.getenv("GITHUB_REPOSITORY") ?: "user/repo")
+        setRepo(System.getenv("GITHUB_REPOSITORY") ?: "Rahul6051276/MegaRepo")
     }
 
     android {
-        namespace = "com.exammegaple"
+        namespace = "com.mega" // यहाँ नाम वही रखें जो आपके पैकेज का है
 
         defaultConfig {
             minSdk = 21
@@ -51,13 +50,13 @@ subprojects {
         }
 
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = JavaVersion.VERSION_17 // Java 8 से 17 पर शिफ्ट होना जरूरी है
+            targetCompatibility = JavaVersion.VERSION_17
         }
 
         tasks.withType<KotlinJvmCompile> {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_1_8) // Required
+                jvmTarget.set(JvmTarget.JVM_17) // Cloudstream अब Java 17 मांगता है
                 freeCompilerArgs.addAll(
                     "-Xno-call-assertions",
                     "-Xno-param-assertions",
@@ -71,20 +70,18 @@ subprojects {
         val apk by configurations
         val implementation by configurations
 
-        // Stubs for all Cloudstream classes
+        // Cloudstream classes
         apk("com.lagradost:cloudstream3:pre-release")
 
-        // these dependencies can include any of those which are added by the app,
-        // but you dont need to include any of them if you dont need them
-        // https://github.com/recloudstream/cloudstream/blob/master/app/build.gradle
-        implementation(kotlin("stdlib")) // adds standard kotlin features, like listOf, mapOf etc
-        implementation("com.github.Blatzar:NiceHttp:0.4.11") // http library
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
-        implementation("org.jsoup:jsoup:1.18.3") // html parser
+        implementation(kotlin("stdlib")) 
+        implementation("com.github.Blatzar:NiceHttp:0.4.11") 
+        // Jackson का वर्जन भी बढ़ा दिया है ताकि 'mapper' वाले एरर न आएं
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
+        implementation("org.jsoup:jsoup:1.18.3") 
     }
 }
 
 task<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(layout.buildDirectory)
 }

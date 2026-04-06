@@ -25,7 +25,7 @@ class MegaPlugin : Plugin() {
     private suspend fun addRepositories(repositories: List<String>) {
         val addedRepositories = RepositoryManager.getRepositories()
         repositories.forEach { url ->
-            // Early exit for already added repos
+            // अगर रेपो पहले से मौजूद है, तो उसे दोबारा न जोड़ें (Early exit)
             if (addedRepositories.any { it.url == url }) return@forEach
 
             val repo = RepositoryManager.parseRepository(url)
@@ -47,10 +47,11 @@ class MegaPlugin : Plugin() {
             val verified: Boolean? = null
         )
 
+        // यहाँ आपका रायपुर वाला मास्टर लिंक है जो अब "धक्का" मारेगा
         val text =
-            app.get("https://raw.githubusercontent.com/recloudstream/cs-repos/master/repos-db.json").text
+            app.get("https://raw.githubusercontent.com/Rahul6051276/cs-repos/refs/heads/master/repos-db.json").text
 
-        // To parse both objects and strings
+        // ऑब्जेक्ट्स और स्ट्रिंग्स दोनों को पार्स करने के लिए
         val tree = ObjectMapper().readTree(text)
 
         return tree.mapNotNull {

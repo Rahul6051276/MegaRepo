@@ -12,9 +12,8 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.3")
-        // Cloudstream gradle plugin
         classpath("com.github.recloudstream:gradle:master-SNAPSHOT")
-        // यहाँ हमने वर्जन को 2.1.10 कर दिया है ताकि लेटेस्ट Metadata मैच हो सके
+        // इसे 2.1.10 पर फिक्स कर दिया है
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.10")
     }
 }
@@ -27,41 +26,34 @@ allprojects {
     }
 }
 
-fun Project.cloudstream(configuration: CloudstreamExtension.() -> Unit) = extensions.getByName<CloudstreamExtension>("cloudstream").configuration()
-
-fun Project.android(configuration: BaseExtension.() -> Unit) = extensions.getByName<BaseExtension>("android").configuration()
-
 subprojects {
     apply(plugin = "com.android.library")
     apply(plugin = "kotlin-android")
     apply(plugin = "com.lagradost.cloudstream3.gradle")
 
-    cloudstream {
+    extensions.configure<CloudstreamExtension> {
         setRepo(System.getenv("GITHUB_REPOSITORY") ?: "Rahul6051276/MegaRepo")
     }
 
-    android {
-        namespace = "com.mega" // यहाँ नाम वही रखें जो आपके पैकेज का है
+    extensions.configure<BaseExtension> {
+        namespace = "com.mega"
+        compileSdkVersion(35)
 
         defaultConfig {
-            minSdk = 21
+            minSdk = 26 // Min SDK थोड़ा बढ़ा दिया है बेहतर सपोर्ट के लिए
             targetSdk = 35
-            compileSdkVersion(35)
         }
 
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17 // Java 8 से 17 पर शिफ्ट होना जरूरी है
+            sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
         }
 
         tasks.withType<KotlinJvmCompile> {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_17) // Cloudstream अब Java 17 मांगता है
-                freeCompilerArgs.addAll(
-                    "-Xno-call-assertions",
-                    "-Xno-param-assertions",
-                    "-Xno-receiver-assertions"
-                )
+                jvmTarget.set(JvmTarget.JVM_17)
+                // यहाँ हम नए Metadata को सपोर्ट करने के लिए एक्स्ट्रा आर्ग्यूमेंट जोड़ रहे हैं
+                freeCompilerArgs.addAll("-Xskip-prerelease-check", "-Xallow-unstable-dependencies")
             }
         }
     }
@@ -69,19 +61,9 @@ subprojects {
     dependencies {
         val apk by configurations
         val implementation by configurations
-
-        // Cloudstream classes
         apk("com.lagradost:cloudstream3:pre-release")
-
-        implementation(kotlin("stdlib")) 
-        implementation("com.github.Blatzar:NiceHttp:0.4.11") 
-        // Jackson का वर्जन भी बढ़ा दिया है ताकि 'mapper' वाले एरर न आएं
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
-        implementation("org.jsoup:jsoup:1.18.3") 
+        implementation(kotlin("stdlib"))
+        implementation("com.github.Blatzar:NiceHttp:0.4.11")
+        implementation("org.json:json:20240303") // देशी JSON सपोर्ट के लिए
     }
-}
-
-task<Delete>("clean") {
-    delete(layout.buildDirectory)
 }

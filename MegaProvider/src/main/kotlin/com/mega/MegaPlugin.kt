@@ -14,29 +14,32 @@ import org.json.JSONObject
 class MegaPlugin : Plugin() {
     override fun load(context: Context) {
         ioSafe {
-            // आपका रायपुर वाला मास्टर लिंक
-            val masterUrl = "https://raw.githubusercontent.com/Rahul6051276/cs-repos/refs/heads/master/repos-db.json"
-            val response = app.get(masterUrl).text
-            
-            // JSON को एकदम देसी तरीके से पार्स करना (बिना किसी बाहरी लाइब्रेरी के)
-            val jsonArray = JSONArray(response)
-            val addedRepos = RepositoryManager.getRepositories()
-
-            for (i in 0 until jsonArray.length()) {
-                val item = jsonArray.get(i)
-                val repoUrl = if (item is String) item else (item as JSONObject).optString("url")
+            try {
+                val masterUrl = "https://raw.githubusercontent.com/Rahul6051276/cs-repos/refs/heads/master/repos-db.json"
+                val response = app.get(masterUrl).text
                 
-                if (!repoUrl.isNullOrEmpty() && addedRepos.none { it.url == repoUrl }) {
-                    try {
-                        val parsed = RepositoryManager.parseRepository(repoUrl)
-                        val data = RepositoryData(parsed?.iconUrl, parsed?.name ?: "Repo", repoUrl)
-                        RepositoryManager.addRepository(data)
-                    } catch (e: Exception) {
-                        try {
-                            RepositoryManager.addRepository(RepositoryData(null, "New Repo", repoUrl))
-                        } catch (ex: Exception) {}
+                val jsonArray = JSONArray(response)
+                val addedRepos = RepositoryManager.getRepositories()
+
+                for (i in 0 until jsonArray.length()) {
+                    val item = jsonArray.get(i)
+                    val repoUrl = if (item is String) item else (item as JSONObject).optString("url")
+                    
+                    if (!repoUrl.isNullOrEmpty()) {
+                        // चेक करें कि क्या पहले से एडेड है
+                        val alreadyExists = addedRepos.any { it.url == repoUrl }
+                        if (!alreadyExists) {
+                            try {
+                                val parsed = RepositoryManager.parseRepository(repoUrl)
+                                RepositoryManager.addRepository(RepositoryData(parsed?.iconUrl, parsed?.name ?: "Repo", repoUrl))
+                            } catch (e: Exception) {
+                                RepositoryManager.addRepository(RepositoryData(null, "New Repo", repoUrl))
+                            }
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                // एरर होने पर कुछ न करें
             }
         }
     }
